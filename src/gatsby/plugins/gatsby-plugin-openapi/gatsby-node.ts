@@ -32,6 +32,21 @@ export const sourceNodes = async (
 
     const parsedContent = parseContent();
 
+
+    for (let tag of parsedContent.tags) {
+      let apiDescriptionNode = {
+        ...tag,
+        id: createNodeId(`APIDescription-${tag.name}`),
+        children: [],
+        parent: null,
+        internal: {
+          contentDigest: createContentDigest(tag.description),
+          type: "APIDocPage",
+        },
+      };
+      createNode(apiDescriptionNode);
+    }
+
     var data: OpenApiPath[] =
       parsedContent.paths &&
       Object.keys(parsedContent.paths).reduce((acc, apiPath) => {
@@ -132,6 +147,26 @@ export const onCreateNode = async ({
   createNodeId,
   createContentDigest,
 }) => {
+
+  if (node.internal.type === 'APIDocPage') {
+    const descriptionNode = {
+      id: createNodeId(`APIDocPageDescription-${node.id}`),
+      parent: node.id,
+      children: [],
+      internal: {
+        type: "APIDocPageDescription",
+        content: node.description,
+        mediaType: "text/markdown",
+        contentDigest: createContentDigest(node.description),
+      },
+    };
+    actions.createNode(descriptionNode);
+    actions.createParentChildLink({
+      parent: node,
+      child: descriptionNode,
+    });
+  }
+
   if (node.internal.type === "openAPI") {
     const descriptionNode = {
       id: createNodeId(`openApiPathDescription-${node.id}`),

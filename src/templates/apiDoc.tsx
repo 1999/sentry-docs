@@ -4,14 +4,15 @@ import { graphql } from "gatsby";
 import BasePage from "~src/components/basePage";
 import SmartLink from "~src/components/smartLink";
 import ApiSidebar from "~src/components/apiSidebar";
+import Content from "~src/components/content"
 
 export default props => {
   const {
-    data: { allOpenApi },
+    data: { allOpenApi, apiDocPage },
   } = props;
-
   return (
     <BasePage sidebar={<ApiSidebar />} {...props}>
+      <Content file={apiDocPage.childApiDocPageDescription} />
       <ul>
         {allOpenApi.edges.map(({ node: { path } }) => (
           <li
@@ -43,6 +44,14 @@ export const pageQuery = graphql`
             operationId
             readableUrl
           }
+        }
+      }
+    }
+    apiDocPage(name: {in: $tag}) {
+      childApiDocPageDescription {
+        childMdx {
+          id
+          body
         }
       }
     }
